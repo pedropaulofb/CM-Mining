@@ -3,13 +3,6 @@ import signal
 import subprocess
 import warnings
 
-import utils.UMLviz
-import utils.back2UML
-import utils.command
-import utils.generateinput
-import utils.graphClustering1
-import utils.gspanMiner
-import utils.ontoumlimport
 import utils.patterns
 
 directory_path = './models'  # replace with the path to your directory

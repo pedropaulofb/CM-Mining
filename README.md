@@ -20,13 +20,13 @@ pip install -r requirements.txt
 
 2. Modify the script to configure parameters and paths according to your needs:
 
-   - `directory_path`: Path to the directory containing UML model files.
-   - `extension`: Desired file extension for UML model files.
-   - `patternspath`: File path for patterns input/output.
-   - `uml_folder`: Path to the folder where PlantUML diagrams will be generated.
-   - `plantuml_jar_path`: Path to the PlantUML JAR file for diagram generation.
-   - `node_labels0`: List of UML node labels.
-   - `edge_labels0`: List of UML edge labels.
+    - `directory_path`: Path to the directory containing UML model files.
+    - `extension`: Desired file extension for UML model files.
+    - `patternspath`: File path for patterns input/output.
+    - `uml_folder`: Path to the folder where PlantUML diagrams will be generated.
+    - `plantuml_jar_path`: Path to the PlantUML JAR file for diagram generation.
+    - `node_labels0`: List of UML node labels.
+    - `edge_labels0`: List of UML edge labels.
 
 3. Run the script:
 
@@ -60,6 +60,3 @@ This script utilizes various utility modules (imported from the `utils` package)
 
 This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
----
-
-*Disclaimer: This README is generated automatically based on the provided Python script and might require adjustments and improvements for accuracy and completeness.*

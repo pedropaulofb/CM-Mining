@@ -1,12 +1,13 @@
-from examples import custom_style_2
 import os
-import time
-import utils.back2UML
+import shutil
 import subprocess
+import time
+
+import utils.UMLviz
+import utils.back2UML
 import utils.generateinput
 import utils.patterns
-import shutil
-import utils.UMLviz
+from examples import custom_style_2
 from prompt_toolkit.validation import Validator
 
 directory_path = '../models'  # replace with the path to your directory
