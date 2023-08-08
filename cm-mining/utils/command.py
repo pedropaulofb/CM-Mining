@@ -3,12 +3,13 @@ import shutil
 import subprocess
 import time
 
-import utils.UMLviz
-import utils.back2UML
-import utils.generateinput
-import utils.patterns
-from examples import custom_style_2
+import PyInquirer
 from prompt_toolkit.validation import Validator
+
+import UMLviz
+import back2UML
+import generateinput
+import patterns
 
 directory_path = '../models'  # replace with the path to your directory
 extension = '.json'  # replace with the desired file extension
@@ -36,7 +37,7 @@ def filterClasses():
             ]
         }
     ]
-    answers = prompt(questions, style=custom_style_2)
+    answers = prompt(questions, style=PyInquirer.examples.custom_style_2)
     selected_strings = answers['selected_strings']
 
     print("Deleted nodes (classes):", selected_strings)
@@ -64,7 +65,7 @@ def filterRelations():
             ]
         }
     ]
-    answers = prompt(questions, style=custom_style_2)
+    answers = prompt(questions, style=PyInquirer.examples.custom_style_2)
     selected_strings = answers['selected_strings']
 
     print("Deleted nodes (relations):", selected_strings)
@@ -89,7 +90,7 @@ def filterEdges():
     ]
     selected_strings = []
     while len(selected_strings) < 2:
-        answers = prompt(questions, style=custom_style_2)
+        answers = prompt(questions, style=PyInquirer.examples.custom_style_2)
         selected_strings = answers['selected_strings']
 
         if len(selected_strings) < 2:
@@ -140,7 +141,7 @@ def parameters():
     values = None
 
     while True:
-        answers = prompt(questions, style=custom_style_2)
+        answers = prompt(questions, style=PyInquirer.examples.custom_style_2)
         min_support = answers['min_support']
         min_num_vertices = answers['min_num_vertices']
         values = [min_support, min_num_vertices]
@@ -345,22 +346,22 @@ def process_pattern(pattern_graphs, host_graphs, converted_patterns_filtered):
         # Print the integer
         print(f"Stored pattern: {integer}")
         input = [str(integer)]
-        selected_pattern = utils.patterns.select_sublists(pattern_graphs, input)
+        selected_pattern = patterns.select_sublists(pattern_graphs, input)
         # print(selected_pattern)
-        find_patterns = utils.patterns.count_subgraph_isomorphisms(selected_pattern, host_graphs)
-        find_patterns_clean_ = utils.patterns.remove_duplicate_graphs(find_patterns)
+        find_patterns = patterns.count_subgraph_isomorphisms(selected_pattern, host_graphs)
+        find_patterns_clean_ = patterns.remove_duplicate_graphs(find_patterns)
         node_labels = ["gen", "characterization", "comparative", "externalDependence", "material", "mediation",
                        "componentOf", "memberOf", "subCollectionOf", "subQuantityOf", "bringsAbout",
                        "creation", "historicalDependence", "manifestation", "participation",
                        "participational", "termination", "triggers", "instantiation", "relation"]
         edge_labels = ["target", "specific", "general", "source"]
         # find_patterns_clean = process_genset_cardinalities(find_patterns_clean_)
-        converted_domain_patterns = utils.back2UML.convert_graphs_new(find_patterns_clean_)
-        converted_domain_patterns_filtered = utils.generateinput.process_graphs__(node_labels, edge_labels,
-                                                                                  converted_domain_patterns)
-        converted_domain_patterns_filtered_0 = utils.patterns.check_and_clean_graphs(converted_patterns_filtered,
-                                                                                     converted_domain_patterns_filtered)
-        utils.UMLviz.convert_to_plantuml_domain(converted_domain_patterns_filtered_0)
+        converted_domain_patterns = back2UML.convert_graphs_new(find_patterns_clean_)
+        converted_domain_patterns_filtered = generateinput.process_graphs__(node_labels, edge_labels,
+                                                                            converted_domain_patterns)
+        converted_domain_patterns_filtered_0 = patterns.check_and_clean_graphs(converted_patterns_filtered,
+                                                                               converted_domain_patterns_filtered)
+        UMLviz.convert_to_plantuml_domain(converted_domain_patterns_filtered_0)
         domain_patterns_folder = "./domain_patterns"
         plantuml_jar_path = "utils/plantumlGenerator.jar"
         viz_uml_diagrams(domain_patterns_folder, plantuml_jar_path)

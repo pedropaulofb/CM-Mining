@@ -2,7 +2,7 @@
 
 import os
 
-directory_path = './models'  # replace with the path to your directory
+directory_path = '../models'  # replace with the path to your directory
 extension = '.json'  # replace with the desired file extension
 
 # loop through the directory and get file names with the desired extension

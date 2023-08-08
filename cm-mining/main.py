@@ -3,7 +3,7 @@ import signal
 import subprocess
 import warnings
 
-import utils.patterns
+import utils.command
 
 directory_path = './models'  # replace with the path to your directory
 extension = '.json'  # replace with the desired file extension
