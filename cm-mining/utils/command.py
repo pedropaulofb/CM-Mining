@@ -1,15 +1,17 @@
 import os
 import shutil
 import subprocess
+import sys
 import time
 
 import PyInquirer
-from prompt_toolkit.validation import Validator
+import prompt_toolkit.validation
+from PyInquirer import prompt
 
-import UMLviz
-import back2UML
-import generateinput
-import patterns
+from .back2uml import convert_graphs_new
+from .generateinput import process_graphs__
+from .uml_viz import convert_to_plantuml_domain
+from .patterns import select_sublists, check_and_clean_graphs, count_subgraph_isomorphisms, remove_duplicate_graphs
 
 directory_path = '../models'  # replace with the path to your directory
 extension = '.json'  # replace with the desired file extension
@@ -108,14 +110,14 @@ def count_files_in_folder(folder_path):
     return file_count
 
 
-class NumberValidator(Validator):
+class NumberValidator(prompt_toolkit.validation.Validator):
 
     def validate(self, document):
         try:
             int(document.text)
         except ValueError:
-            raise ValidationError(message="Please enter a value",
-                                  cursor_position=len(document.text))
+            raise prompt_toolkit.ValidationError(message="Please enter a value",
+                                                 cursor_position=len(document.text))
 
 
 def parameters():
@@ -252,20 +254,16 @@ def secondstop():
         print("...")
 
 
-import sys
-from PyInquirer import prompt, Validator, ValidationError
-
-
-class FloatValidator(Validator):
+class FloatValidator(prompt_toolkit.validation.Validator):
     def validate(self, document):
         try:
             value = float(document.text)
             if not (0 <= value <= 1):
-                raise ValidationError(
+                raise prompt_toolkit.validation.ValidationError(
                     message='Please enter a number between 0 and 1',
                     cursor_position=len(document.text))
         except ValueError:
-            raise ValidationError(
+            raise prompt_toolkit.validation.ValidationError(
                 message='Please enter a valid number',
                 cursor_position=len(document.text))
 
@@ -346,22 +344,22 @@ def process_pattern(pattern_graphs, host_graphs, converted_patterns_filtered):
         # Print the integer
         print(f"Stored pattern: {integer}")
         input = [str(integer)]
-        selected_pattern = patterns.select_sublists(pattern_graphs, input)
+        selected_pattern = select_sublists(pattern_graphs, input)
         # print(selected_pattern)
-        find_patterns = patterns.count_subgraph_isomorphisms(selected_pattern, host_graphs)
-        find_patterns_clean_ = patterns.remove_duplicate_graphs(find_patterns)
+        find_patterns = count_subgraph_isomorphisms(selected_pattern, host_graphs)
+        find_patterns_clean_ = remove_duplicate_graphs(find_patterns)
         node_labels = ["gen", "characterization", "comparative", "externalDependence", "material", "mediation",
                        "componentOf", "memberOf", "subCollectionOf", "subQuantityOf", "bringsAbout",
                        "creation", "historicalDependence", "manifestation", "participation",
                        "participational", "termination", "triggers", "instantiation", "relation"]
         edge_labels = ["target", "specific", "general", "source"]
         # find_patterns_clean = process_genset_cardinalities(find_patterns_clean_)
-        converted_domain_patterns = back2UML.convert_graphs_new(find_patterns_clean_)
-        converted_domain_patterns_filtered = generateinput.process_graphs__(node_labels, edge_labels,
+        converted_domain_patterns = convert_graphs_new(find_patterns_clean_)
+        converted_domain_patterns_filtered = process_graphs__(node_labels, edge_labels,
                                                                             converted_domain_patterns)
-        converted_domain_patterns_filtered_0 = patterns.check_and_clean_graphs(converted_patterns_filtered,
-                                                                               converted_domain_patterns_filtered)
-        UMLviz.convert_to_plantuml_domain(converted_domain_patterns_filtered_0)
+        converted_domain_patterns_filtered_0 = check_and_clean_graphs(converted_patterns_filtered,
+                                                                      converted_domain_patterns_filtered)
+        convert_to_plantuml_domain(converted_domain_patterns_filtered_0)
         domain_patterns_folder = "./domain_patterns"
         plantuml_jar_path = "utils/plantumlGenerator.jar"
         viz_uml_diagrams(domain_patterns_folder, plantuml_jar_path)

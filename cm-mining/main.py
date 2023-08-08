@@ -3,13 +3,13 @@ import signal
 import subprocess
 import warnings
 
-import utils.command
+from utils import ontoumlimport, command, generateinput, gspanMiner, back2uml, graphClustering1, uml_viz
 
 directory_path = './models'  # replace with the path to your directory
 extension = '.json'  # replace with the desired file extension
 patternspath = "input/outputpatterns.txt"  # replace with patterns file name
 uml_folder = "./patterns"
-plantuml_jar_path = "utils/plantumlGenerator.jar"
+plantuml_jar_path = "plantumlGenerator.jar"
 node_labels0 = ["gen", "characterization", "comparative", "externalDependence", "material", "mediation",
                 "componentOf", "memberOf", "subCollectionOf", "subQuantityOf", "bringsAbout",
                 "creation", "historicalDependence", "manifestation", "participation",
@@ -23,19 +23,19 @@ for filename in os.listdir(directory_path):
 
 if __name__ == "__main__":
 
-    graphs = utils.ontoumlimport.generateFullUndirected(file_names)
-    class_labels = utils.command.filterClasses()
-    relation_labels = utils.command.filterRelations()
+    graphs = ontoumlimport.generateFullUndirected(file_names)
+    class_labels = command.filterClasses()
+    relation_labels = command.filterRelations()
     node_labels = class_labels + relation_labels
-    edge_labels = utils.command.filterEdges()
-    newgraphs = utils.generateinput.process_graphs(node_labels, edge_labels, graphs)
-    newgraphs_with_names = utils.generateinput.process_graphs_with_names(node_labels, edge_labels, graphs)
+    edge_labels = command.filterEdges()
+    newgraphs = generateinput.process_graphs(node_labels, edge_labels, graphs)
+    newgraphs_with_names = generateinput.process_graphs_with_names(node_labels, edge_labels, graphs)
     # newgraphs = replace_labels_with_default(class_labels, relation_labels, edge_labels, graphs)
-    downloadgraphs = utils.generateinput.save_graphs_to_pickle(newgraphs, './input/graphs.pickle')
-    data = utils.generateinput.graphs_to_data_file(newgraphs_with_names, 'graphs')
-    gsParameters = utils.command.parameters()
+    downloadgraphs = generateinput.save_graphs_to_pickle(newgraphs, './input/graphs.pickle')
+    data = generateinput.graphs_to_data_file(newgraphs_with_names, 'graphs')
+    gsParameters = command.parameters()
     print("Baking the output... ")
-    inputs = utils.gspanMiner.gsparameters(gsParameters)
+    inputs = gspanMiner.gsparameters(gsParameters)
 
 
     def timeout_handler(signum, frame):
@@ -46,35 +46,35 @@ if __name__ == "__main__":
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.alarm(900)  # seconds
     try:
-        patterns = utils.gspanMiner.run_gspan(inputs)
+        patterns = gspanMiner.run_gspan(inputs)
     except TimeoutError:
         print("Function execution timed out")
     finally:
         signal.alarm(0)
-    utils.command.firststop()
+    command.firststop()
 
-    uploadgraphs = utils.patterns.load_graphs_from_pickle('./input/graphs.pickle')
-    pattern_graphs = utils.patterns.convertPatterns(patternspath)
-    pro_pattern_graphs = utils.patterns.return_all_domain_info(pattern_graphs)
-    # patterns_features = utils.graphClustering.extract_features(pattern_graphs)
-    patterns_features = utils.graphClustering1.graphs2dataframes2vectors(pattern_graphs)
-    # patterns_dataframe = utils.graphClustering.transform_graph_data(patterns_features)
-    patterns_dataframe = utils.graphClustering1.transform2singledataframe(patterns_features)
+    uploadgraphs = patterns.load_graphs_from_pickle('./input/graphs.pickle')
+    pattern_graphs = patterns.convertPatterns(patternspath)
+    pro_pattern_graphs = patterns.return_all_domain_info(pattern_graphs)
+    # patterns_features = graphClustering.extract_features(pattern_graphs)
+    patterns_features = graphClustering1.graphs2dataframes2vectors(pattern_graphs)
+    # patterns_dataframe = graphClustering.transform_graph_data(patterns_features)
+    patterns_dataframe = graphClustering1.transform2singledataframe(patterns_features)
     print("patterns_dataframe")
     print(patterns_dataframe)
-    patterns_similarity_matrix = utils.graphClustering1.calculate_similarity(patterns_dataframe)
+    patterns_similarity_matrix = graphClustering1.calculate_similarity(patterns_dataframe)
     print("patterns_similarity_matrix")
     print(patterns_similarity_matrix)
-    similarity_threshold = utils.command.ask_similarity_threshold()
-    patterns_cluster_labels = utils.graphClustering1.group_similar_items(patterns_similarity_matrix,
-                                                                         similarity_threshold)
-    pattern_graphs_clustered_ = utils.graphClustering1.merge_lists(patterns_cluster_labels, pattern_graphs)
-    pattern_graphs_clustered = utils.back2UML.process_genset_cardinalities(pattern_graphs_clustered_)
-    converted_patterns = utils.back2UML.convert_graphs_new(pattern_graphs_clustered)
+    similarity_threshold = command.ask_similarity_threshold()
+    patterns_cluster_labels = graphClustering1.group_similar_items(patterns_similarity_matrix,
+                                                                   similarity_threshold)
+    pattern_graphs_clustered_ = graphClustering1.merge_lists(patterns_cluster_labels, pattern_graphs)
+    pattern_graphs_clustered = back2uml.process_genset_cardinalities(pattern_graphs_clustered_)
+    converted_patterns = back2uml.convert_graphs_new(pattern_graphs_clustered)
     # patterns_cluster_viz = convert_to_plantuml_clusters(pattern_graphs_clustered)
 
-    converted_patterns_filtered = utils.generateinput.process_graphs__(node_labels0, edge_labels0, converted_patterns)
-    utils.UMLviz.convert_to_plantuml_clusters(converted_patterns_filtered)
+    converted_patterns_filtered = generateinput.process_graphs__(node_labels0, edge_labels0, converted_patterns)
+    uml_viz.convert_to_plantuml_clusters(converted_patterns_filtered)
     warnings.filterwarnings("ignore")
 
     # Iterate over subfolders in the uml folder
@@ -84,6 +84,6 @@ if __name__ == "__main__":
             cmd = f"java -jar {plantuml_jar_path} {subfolder_path}"
             subprocess.run(cmd, shell=True, check=True)
 
-    utils.command.secondstop()
-    utils.command.process_pattern(pro_pattern_graphs, uploadgraphs, converted_patterns_filtered)
-    utils.command.laststop()
+    command.secondstop()
+    command.process_pattern(pro_pattern_graphs, uploadgraphs, converted_patterns_filtered)
+    command.laststop()
